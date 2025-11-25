@@ -1,0 +1,7 @@
+{
+  "name": "daily-deal-decipher",
+  "permissions": [],
+  "scopes": [
+    "product_list:write"
+  ]
+}
