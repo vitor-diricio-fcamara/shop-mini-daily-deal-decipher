@@ -15,7 +15,6 @@ const CATEGORIES = [
 ]
 
 export function OnboardingPage() {
-  console.log('OnboardingPage: Render')
   const navigate = useNavigateWithTransition()
   const { setCategories, completeOnboarding } = useUserPreferences()
   const [selected, setSelected] = useState<string[]>([])

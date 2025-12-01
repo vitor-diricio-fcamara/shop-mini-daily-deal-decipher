@@ -9,17 +9,13 @@ function Root() {
   const { preferences, loading } = useUserPreferences()
   const navigate = useNavigateWithTransition()
 
-  console.log('Root: Render', { loading, hasOnboarded: preferences.hasOnboarded })
-
   useEffect(() => {
     if (!loading && !preferences.hasOnboarded) {
-      console.log('Root: Navigating to onboarding')
       navigate('/onboarding', { replace: true })
     }
   }, [loading, preferences.hasOnboarded, navigate])
 
   if (loading) {
-    console.log('Root: Show skeleton')
     return (
       <div className="min-h-screen bg-white p-4 flex items-center justify-center">
         <Skeleton className="h-12 w-12 rounded-full" />
@@ -27,7 +23,6 @@ function Root() {
     )
   }
 
-  console.log('Root: Render Content', { hasOnboarded: preferences.hasOnboarded })
   return preferences.hasOnboarded ? <HomePage /> : null
 }
 

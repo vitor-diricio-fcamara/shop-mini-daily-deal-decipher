@@ -27,16 +27,11 @@ export interface Deal extends DealProduct {
 
 export function useDailyDeals() {
   const { preferences } = useUserPreferences()
-  // @ts-ignore - Accessing properties that exist but might be typed differently in the installed version
   const popular = usePopularProducts()
-  // @ts-ignore
   const search = useProductSearch({ query: preferences.categories.join(' OR ') })
 
   const hasPreferences = preferences.categories.length > 0
   
-  // Use search results if user has preferences, otherwise fallback to popular
-  // However, if search returns empty (e.g. no matches), we might want to fallback to popular? 
-  // For now, strict personalization seems better for "Decipher".
   const source = hasPreferences ? search : popular
 
   const { products, fetchMore, loading, hasNextPage } = source

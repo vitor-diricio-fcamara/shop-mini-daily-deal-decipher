@@ -26,7 +26,6 @@ export function useUserPreferences() {
   const [loading, setLoading] = useState(true)
 
   const loadPreferences = useCallback(async () => {
-    console.log('useUserPreferences: Loading preferences...')
     try {
       const [categories, hasOnboarded, streak, lastVisit] = await Promise.all([
         getItem({ key: STORAGE_KEYS.CATEGORIES }),
@@ -34,8 +33,6 @@ export function useUserPreferences() {
         getItem({ key: STORAGE_KEYS.STREAK }),
         getItem({ key: STORAGE_KEYS.LAST_VISIT }),
       ])
-
-      console.log('useUserPreferences: Raw values', { categories, hasOnboarded, streak, lastVisit })
 
       setPreferences({
         categories: categories ? JSON.parse(categories) : [],
@@ -46,10 +43,9 @@ export function useUserPreferences() {
     } catch (error) {
       console.error('Failed to load preferences:', error)
     } finally {
-      console.log('useUserPreferences: Finished loading')
       setLoading(false)
     }
-  }, [getItem])
+  }, []) // Removed getItem dependency to prevent infinite loops
 
   useEffect(() => {
     loadPreferences()

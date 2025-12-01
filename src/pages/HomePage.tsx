@@ -1,5 +1,5 @@
-import { ProductCard, List, Badge, Button, Skeleton, Toaster, toast, Alert, AlertTitle, AlertDescription } from '@shopify/shop-minis-react'
-import { Timer, TrendingDown, Tag, Percent, Lock, Unlock, Clock, Fire, Share2, RefreshCw } from 'lucide-react'
+import { ProductCard, List, Badge, Button, Skeleton, Toaster, toast } from '@shopify/shop-minis-react'
+import { Timer, TrendingDown, Tag, Percent, Lock, Unlock, Clock, Share2, Settings } from 'lucide-react'
 import { useDailyDeals } from '../hooks/useDailyDeals'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -66,14 +66,12 @@ function LoadingSkeleton() {
 function DailyStreak({ streak }: { streak: number }) {
   return (
     <div className="flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold border border-orange-200">
-      <Fire className="w-4 h-4 mr-1 text-orange-500 fill-orange-500" />
       {streak} Day Streak
     </div>
   )
 }
 
 export function HomePage() {
-  console.log('HomePage: Render')
   const navigate = useNavigate()
   const { preferences, updateStreak, resetPreferences } = useUserPreferences()
   const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized } = useDailyDeals()
@@ -136,7 +134,7 @@ export function HomePage() {
       {/* Glassy Header */}
       <div className="px-4 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-sm transition-all">
         <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
                 <TrendingDown className="w-5 h-5 text-red-600" />
                 <h1 className="text-lg font-bold text-gray-900 tracking-tight">Daily Deal Decipher</h1>
@@ -145,9 +143,15 @@ export function HomePage() {
                   {isPersonalized ? 'Curated for you.' : 'Biggest drops, tracked daily.'}
                 </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
                 <DailyStreak streak={preferences.streak} />
-                <CountdownTimer />
+                <button 
+                  onClick={handleReset}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Reset Preferences"
+                >
+                  <Settings className="w-5 h-5 text-gray-500" />
+                </button>
             </div>
         </div>
       </div>
@@ -161,6 +165,7 @@ export function HomePage() {
                 </Badge>
                 <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Daily Mystery</span>
             </div>
+            <CountdownTimer />
         </div>
         
         <AnimatePresence mode="wait">
@@ -270,16 +275,6 @@ export function HomePage() {
              <Button variant="secondary" onClick={() => fetchMore()} className="mt-4">Check for more</Button>
            </div>
         )}
-        
-        <div className="mt-8 pt-8 border-t border-gray-200 text-center">
-            <button 
-                onClick={handleReset}
-                className="text-xs text-gray-400 flex items-center justify-center mx-auto hover:text-gray-600 transition-colors"
-            >
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Reset Preferences
-            </button>
-        </div>
       </div>
     </div>
   )
