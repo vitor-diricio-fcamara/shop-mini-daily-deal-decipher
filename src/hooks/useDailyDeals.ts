@@ -28,7 +28,20 @@ export interface Deal extends DealProduct {
 export function useDailyDeals() {
   const { preferences } = useUserPreferences()
   const popular = usePopularProducts()
-  const search = useProductSearch({ query: preferences.categories.join(' OR ') })
+  
+  // Construct a search query using 'product_type' which works with Category Names (e.g. "Apparel & Accessories")
+  // This is more robust than 'filters.category' which requires strict GIDs and perfectly tagged products.
+  const query = useMemo(() => {
+    if (preferences.categories.length === 0) return ''
+    
+    // Create a query that looks for the category name in product_type OR tag
+    // Example: (product_type:"Apparel & Accessories" OR tag:"Apparel & Accessories")
+    return preferences.categories
+      .map(cat => `(product_type:"${cat}" OR tag:"${cat}")`)
+      .join(' OR ')
+  }, [preferences.categories])
+
+  const search = useProductSearch({ query })
 
   const hasPreferences = preferences.categories.length > 0
   

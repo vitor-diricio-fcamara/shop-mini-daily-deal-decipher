@@ -1,18 +1,46 @@
 import { useState } from 'react'
 import { Button, useNavigateWithTransition } from '@shopify/shop-minis-react'
-import { Check, Zap, Shirt, Home, Dumbbell, Gamepad, Heart, Star } from 'lucide-react'
+import { 
+  Check, Zap, Shirt, Home, Dumbbell, Gamepad, Heart, Star,
+  PawPrint, Palette, Baby, Briefcase, Camera, Utensils, Gift, Hammer, 
+  Luggage, EyeOff, Film, Paperclip, Sun, User, Disc, Car, Armchair
+} from 'lucide-react'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { motion } from 'framer-motion'
+import categoriesData from '../data/categories.json'
 
-const CATEGORIES = [
-  { id: 'Tech', label: 'Tech & Gadgets', icon: Zap },
-  { id: 'Fashion', label: 'Fashion', icon: Shirt },
-  { id: 'Home', label: 'Home & Living', icon: Home },
-  { id: 'Fitness', label: 'Fitness', icon: Dumbbell },
-  { id: 'Gaming', label: 'Gaming', icon: Gamepad },
-  { id: 'Beauty', label: 'Beauty', icon: Heart },
-  { id: 'Kids', label: 'Kids & Toys', icon: Star },
-]
+const ICON_MAP: Record<string, any> = {
+  'Animals & Pet Supplies': PawPrint,
+  'Apparel & Accessories': Shirt,
+  'Arts & Entertainment': Palette,
+  'Baby & Toddler': Baby,
+  'Business & Industrial': Briefcase,
+  'Cameras & Optics': Camera,
+  'Electronics': Zap,
+  'Food, Beverages & Tobacco': Utensils,
+  'Furniture': Armchair,
+  'Gift Cards': Gift,
+  'Hardware': Hammer,
+  'Health & Beauty': Heart,
+  'Home & Garden': Home,
+  'Luggage & Bags': Luggage,
+  'Mature': EyeOff,
+  'Media': Film,
+  'Office Supplies': Paperclip,
+  'Patio & Garden': Sun,
+  'Religious & Ceremonial': Star,
+  'Services': User,
+  'Software': Disc,
+  'Sporting Goods': Dumbbell,
+  'Toys & Games': Gamepad,
+  'Vehicles & Parts': Car,
+}
+
+const CATEGORIES = (categoriesData as any).verticals.map((vertical: any) => ({
+  id: vertical.name, // Testing Category Name for filter
+  label: vertical.name,
+  icon: ICON_MAP[vertical.name] || Star
+}))
 
 export function OnboardingPage() {
   const navigate = useNavigateWithTransition()
@@ -108,4 +136,3 @@ export function OnboardingPage() {
     </div>
   )
 }
-
