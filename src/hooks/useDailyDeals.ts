@@ -1,10 +1,12 @@
-import { usePopularProducts } from '@shopify/shop-minis-react'
+import { usePopularProducts, useProductSearch } from '@shopify/shop-minis-react'
 import { useMemo } from 'react'
+import { useUserPreferences } from './useUserPreferences'
 
 export interface DealProduct {
   id: string
   title: string
   vendor: string
+  productType?: string
   featuredImage?: {
     url: string
   }
@@ -16,7 +18,6 @@ export interface DealProduct {
     amount: string
     currencyCode: string
   }
-  // Add other fields as needed based on actual SDK return type
 }
 
 export interface Deal extends DealProduct {
@@ -25,15 +26,26 @@ export interface Deal extends DealProduct {
 }
 
 export function useDailyDeals() {
-  const { products, fetchMore } = usePopularProducts()
+  const { preferences } = useUserPreferences()
+  // @ts-ignore - Accessing properties that exist but might be typed differently in the installed version
+  const popular = usePopularProducts()
+  // @ts-ignore
+  const search = useProductSearch({ query: preferences.categories.join(' OR ') })
+
+  const hasPreferences = preferences.categories.length > 0
+  
+  // Use search results if user has preferences, otherwise fallback to popular
+  // However, if search returns empty (e.g. no matches), we might want to fallback to popular? 
+  // For now, strict personalization seems better for "Decipher".
+  const source = hasPreferences ? search : popular
+
+  const { products, fetchMore, loading, hasNextPage } = source
 
   const deals = useMemo(() => {
     if (!products) return []
 
     const dealsList = products
       .filter((product: any) => {
-        // Check if product has price and compareAtPrice
-        // Note: The actual shape might vary, assuming standard Shopify shape or flattened
         const price = parseFloat(product.price?.amount || product.price || '0')
         const compareAt = parseFloat(product.compareAtPrice?.amount || product.compareAtPrice || '0')
         return compareAt > price
@@ -50,7 +62,7 @@ export function useDailyDeals() {
           savingsAmount
         }
       })
-      .sort((a, b) => b.discountPercentage - a.discountPercentage) // Sort by highest discount
+      .sort((a: any, b: any) => b.discountPercentage - a.discountPercentage)
 
     return dealsList
   }, [products])
@@ -63,6 +75,8 @@ export function useDailyDeals() {
     otherDeals,
     allDeals: deals,
     fetchMore,
+    isLoading: loading,
+    hasMore: hasNextPage,
+    isPersonalized: hasPreferences
   }
 }
-
