@@ -1,6 +1,9 @@
 import { usePopularProducts, useProductSearch } from '@shopify/shop-minis-react'
 import { useMemo } from 'react'
 import { useUserPreferences } from './useUserPreferences'
+import { getRobustQuery } from '../utils/taxonomyUtils'
+// @ts-ignore
+import categoriesData from '../data/categories.json'
 
 export interface DealProduct {
   id: string
@@ -29,19 +32,50 @@ export function useDailyDeals() {
   const { preferences } = useUserPreferences()
   const popular = usePopularProducts()
   
-  // Construct a search query using 'product_type' which works with Category Names (e.g. "Apparel & Accessories")
-  // This is more robust than 'filters.category' which requires strict GIDs and perfectly tagged products.
-  const query = useMemo(() => {
-    if (preferences.categories.length === 0) return ''
+  // Build query from selected level 2 categories using breadcrumb paths
+  const searchQuery = useMemo(() => {
+    if (preferences.categories.length === 0) {
+      console.log('[useDailyDeals] No categories selected, using popular products')
+      return ''
+    }
     
-    // Create a query that looks for the category name in product_type OR tag
-    // Example: (product_type:"Apparel & Accessories" OR tag:"Apparel & Accessories")
-    return preferences.categories
-      .map(cat => `(product_type:"${cat}" OR tag:"${cat}")`)
-      .join(' OR ')
+    // Find categories by their IDs and build queries from their breadcrumbs
+    const queries: string[] = []
+    
+    preferences.categories.forEach(categoryId => {
+      // Search through all verticals to find the category
+      let foundCategory: any = null
+      ;(categoriesData as any).verticals.forEach((vertical: any) => {
+        const category = vertical.categories?.find((cat: any) => cat.id === categoryId)
+        if (category && category.full_name) {
+          foundCategory = category
+        }
+      })
+      
+      if (foundCategory) {
+        const robustQuery = getRobustQuery(foundCategory)
+        if (robustQuery) {
+          queries.push(robustQuery)
+          console.log(`[useDailyDeals] Category "${foundCategory.name}" -> Query: "${robustQuery}"`)
+        }
+      }
+    })
+    
+    if (queries.length === 0) {
+      console.warn('[useDailyDeals] No valid categories found, using popular products')
+      return ''
+    }
+    
+    // Combine all queries with OR
+    const combinedQuery = queries.join(' OR ')
+    console.log(`[useDailyDeals] Combined query: ${combinedQuery.substring(0, 200)}...`)
+    return combinedQuery
   }, [preferences.categories])
 
-  const search = useProductSearch({ query })
+  const search = useProductSearch({ 
+    query: searchQuery,
+    skip: !searchQuery
+  })
 
   const hasPreferences = preferences.categories.length > 0
   
@@ -85,6 +119,16 @@ export function useDailyDeals() {
     fetchMore,
     isLoading: loading,
     hasMore: hasNextPage,
-    isPersonalized: hasPreferences
+    isPersonalized: hasPreferences,
+    // Debug info
+    debugInfo: {
+      searchTerms: searchQuery ? searchQuery.split(' OR ').slice(0, 20) : [],
+      selectedCategories: preferences.categories,
+      rawProductCount: products?.length || 0,
+      dealsCount: deals.length,
+      query: searchQuery || 'No query (using popular products)',
+      isUsingSearch: hasPreferences,
+      searchMethod: hasPreferences ? 'Breadcrumb Query' : 'Popular Products'
+    }
   }
 }

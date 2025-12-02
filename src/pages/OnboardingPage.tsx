@@ -1,45 +1,15 @@
 import { useState } from 'react'
 import { Button, useNavigateWithTransition } from '@shopify/shop-minis-react'
-import { 
-  Check, Zap, Shirt, Home, Dumbbell, Gamepad, Heart, Star,
-  PawPrint, Palette, Baby, Briefcase, Camera, Utensils, Gift, Hammer, 
-  Luggage, EyeOff, Film, Paperclip, Sun, User, Disc, Car, Armchair
-} from 'lucide-react'
+import { Check, Zap } from 'lucide-react'
 import { useUserPreferences } from '../hooks/useUserPreferences'
 import { motion } from 'framer-motion'
-import categoriesData from '../data/categories.json'
+import { getLevel2Categories } from '../utils/taxonomyUtils'
 
-const ICON_MAP: Record<string, any> = {
-  'Animals & Pet Supplies': PawPrint,
-  'Apparel & Accessories': Shirt,
-  'Arts & Entertainment': Palette,
-  'Baby & Toddler': Baby,
-  'Business & Industrial': Briefcase,
-  'Cameras & Optics': Camera,
-  'Electronics': Zap,
-  'Food, Beverages & Tobacco': Utensils,
-  'Furniture': Armchair,
-  'Gift Cards': Gift,
-  'Hardware': Hammer,
-  'Health & Beauty': Heart,
-  'Home & Garden': Home,
-  'Luggage & Bags': Luggage,
-  'Mature': EyeOff,
-  'Media': Film,
-  'Office Supplies': Paperclip,
-  'Patio & Garden': Sun,
-  'Religious & Ceremonial': Star,
-  'Services': User,
-  'Software': Disc,
-  'Sporting Goods': Dumbbell,
-  'Toys & Games': Gamepad,
-  'Vehicles & Parts': Car,
-}
-
-const CATEGORIES = (categoriesData as any).verticals.map((vertical: any) => ({
-  id: vertical.name, // Testing Category Name for filter
-  label: vertical.name,
-  icon: ICON_MAP[vertical.name] || Star
+// Get all level 2 categories
+const CATEGORIES = getLevel2Categories().map(cat => ({
+  id: cat.id,
+  label: cat.name,
+  full_name: cat.full_name
 }))
 
 export function OnboardingPage() {
@@ -80,33 +50,27 @@ export function OnboardingPage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 w-full">
-          {CATEGORIES.map((category, index) => {
+        <div className="flex flex-wrap gap-2 w-full max-h-[60vh] overflow-y-auto">
+          {CATEGORIES.map((category: { id: string; label: string; full_name: string }, index: number) => {
             const isSelected = selected.includes(category.id)
-            const Icon = category.icon
 
             return (
               <motion.div
                 key={category.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.02 }}
               >
                 <button
                   onClick={() => toggleCategory(category.id)}
-                  className={`w-full p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${
+                  className={`px-4 py-2 rounded-full border-2 flex items-center gap-2 transition-all ${
                     isSelected
                       ? 'border-red-600 bg-red-50 text-red-700'
-                      : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-red-600' : 'text-gray-400'}`} />
-                  <span className="font-medium text-sm">{category.label}</span>
-                  {isSelected && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-4 h-4 text-red-600" />
-                    </div>
-                  )}
+                  {isSelected && <Check className="w-4 h-4" />}
+                  <span className="font-medium text-sm whitespace-nowrap">{category.label}</span>
                 </button>
               </motion.div>
             )

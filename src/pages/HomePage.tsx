@@ -1,5 +1,5 @@
 import { ProductCard, List, Badge, Button, Skeleton, Toaster, toast } from '@shopify/shop-minis-react'
-import { Timer, TrendingDown, Tag, Percent, Lock, Unlock, Clock, Share2, Settings } from 'lucide-react'
+import { Timer, TrendingDown, Tag, Percent, Lock, Unlock, Clock, Share2, Settings, Bug } from 'lucide-react'
 import { useDailyDeals } from '../hooks/useDailyDeals'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -71,10 +71,96 @@ function DailyStreak({ streak }: { streak: number }) {
   )
 }
 
+function DebugCard({ debugInfo }: { debugInfo: any }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  
+  if (!debugInfo) return null
+
+  return (
+    <div className="mx-4 mb-4 bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-100 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Bug className="w-4 h-4 text-blue-600" />
+          <span className="font-semibold text-blue-900">Debug Info</span>
+        </div>
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-blue-700">
+            {debugInfo.rawProductCount} products → {debugInfo.dealsCount} deals
+          </span>
+          <span className="text-blue-500">{isExpanded ? '▼' : '▶'}</span>
+        </div>
+      </button>
+      
+      {isExpanded && (
+        <div className="px-4 pb-4 space-y-3 border-t border-blue-200 pt-3">
+          <div>
+            <div className="text-xs font-semibold text-blue-800 mb-1">Selected Categories:</div>
+            <div className="flex flex-wrap gap-1">
+              {debugInfo.selectedCategories.length > 0 ? (
+                debugInfo.selectedCategories.map((cat: string, i: number) => (
+                  <Badge key={i} variant="secondary" className="text-xs">{cat}</Badge>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500">None (using popular products)</span>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <div className="text-xs font-semibold text-blue-800 mb-1">
+              Search Terms ({debugInfo.searchTerms?.length || 0}):
+            </div>
+            <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+              {debugInfo.searchTerms && debugInfo.searchTerms.length > 0 ? (
+                <>
+                  {debugInfo.searchTerms.slice(0, 20).map((term: string, i: number) => (
+                    <span key={i} className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                      {term}
+                    </span>
+                  ))}
+                  {debugInfo.searchTerms.length > 20 && (
+                    <span className="text-xs text-gray-500">
+                      +{debugInfo.searchTerms.length - 20} more terms...
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs text-gray-500">No search terms (using popular products)</span>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <div className="text-xs font-semibold text-blue-800 mb-1">Results:</div>
+            <div className="text-xs text-gray-700 space-y-1">
+              <div>Raw products found: <strong>{debugInfo.rawProductCount}</strong></div>
+              <div>Deals after filtering: <strong>{debugInfo.dealsCount}</strong></div>
+              <div>Search Method: <strong className={debugInfo.searchMethod === 'Breadcrumb Query' ? 'text-green-600' : 'text-gray-600'}>{debugInfo.searchMethod || 'Popular Products'}</strong></div>
+            </div>
+          </div>
+          
+          {debugInfo.query && (
+            <div>
+              <div className="text-xs font-semibold text-blue-800 mb-1">Query (first 200 chars):</div>
+              <div className="text-xs bg-gray-100 p-2 rounded font-mono text-gray-700 break-all">
+                {debugInfo.query.substring(0, 200)}
+                {debugInfo.query.length > 200 && '...'}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function HomePage() {
   const navigate = useNavigate()
   const { preferences, updateStreak, resetPreferences } = useUserPreferences()
-  const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized } = useDailyDeals()
+  const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized, debugInfo } = useDailyDeals()
   const { createImageContent, loading: sharing } = useCreateImageContent()
   
   const [isMysteryRevealed, setIsMysteryRevealed] = useState(false)
@@ -237,6 +323,9 @@ export function HomePage() {
             )}
         </AnimatePresence>
       </div>
+
+      {/* Debug Card */}
+      <DebugCard debugInfo={debugInfo} />
 
       {/* List: Top Drops */}
       <div className="px-4">
