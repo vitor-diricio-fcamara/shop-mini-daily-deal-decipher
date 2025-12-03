@@ -1,10 +1,9 @@
-import { ProductCard, List, Badge, Button, Skeleton, Toaster, toast } from '@shopify/shop-minis-react'
-import { Timer, TrendingDown, Tag, Percent, Lock, Unlock, Clock, Share2, Settings, Bug } from 'lucide-react'
+import { ProductCard, List, Badge, Button, Skeleton } from '@shopify/shop-minis-react'
+import { Timer, TrendingDown, Percent, Lock, Unlock, Clock, Settings } from 'lucide-react'
 import { useDailyDeals } from '../hooks/useDailyDeals'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUserPreferences } from '../hooks/useUserPreferences'
-import { useCreateImageContent } from '@shopify/shop-minis-react'
 import { useNavigate } from 'react-router'
 
 // --- Components ---
@@ -63,146 +62,11 @@ function LoadingSkeleton() {
   )
 }
 
-function DailyStreak({ streak }: { streak: number }) {
-  return (
-    <div className="flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold border border-orange-200">
-      {streak} Day Streak
-    </div>
-  )
-}
-
-function DebugCard({ debugInfo }: { debugInfo: any }) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  
-  if (!debugInfo) return null
-
-  return (
-    <div className="mx-4 mb-4 bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-100 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Bug className="w-4 h-4 text-blue-600" />
-          <span className="font-semibold text-blue-900">Debug Info</span>
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-blue-700">
-            {debugInfo.rawProductCount} products → {debugInfo.dealsCount} deals
-          </span>
-          <span className="text-blue-500">{isExpanded ? '▼' : '▶'}</span>
-        </div>
-      </button>
-      
-      {isExpanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-blue-200 pt-3">
-          <div>
-            <div className="text-xs font-semibold text-blue-800 mb-1">Selected Categories:</div>
-            <div className="flex flex-wrap gap-1">
-              {debugInfo.selectedCategories.length > 0 ? (
-                debugInfo.selectedCategories.map((cat: string, i: number) => (
-                  <Badge key={i} variant="secondary" className="text-xs">{cat}</Badge>
-                ))
-              ) : (
-                <span className="text-xs text-gray-500">None (using popular products)</span>
-              )}
-            </div>
-          </div>
-          
-          <div>
-            <div className="text-xs font-semibold text-blue-800 mb-1">
-              Search Terms ({debugInfo.searchTerms?.length || 0}):
-            </div>
-            <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-              {debugInfo.searchTerms && debugInfo.searchTerms.length > 0 ? (
-                <>
-                  {debugInfo.searchTerms.slice(0, 20).map((term: string, i: number) => (
-                    <span key={i} className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                      {term}
-                    </span>
-                  ))}
-                  {debugInfo.searchTerms.length > 20 && (
-                    <span className="text-xs text-gray-500">
-                      +{debugInfo.searchTerms.length - 20} more terms...
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="text-xs text-gray-500">No search terms (using popular products)</span>
-              )}
-            </div>
-          </div>
-          
-          <div>
-            <div className="text-xs font-semibold text-blue-800 mb-1">Results:</div>
-            <div className="text-xs text-gray-700 space-y-1">
-              <div>Raw products found: <strong>{debugInfo.rawProductCount}</strong></div>
-              <div>Deals after filtering: <strong>{debugInfo.dealsCount}</strong></div>
-              <div>Search Method: <strong className={debugInfo.searchMethod === 'Breadcrumb Query' ? 'text-green-600' : 'text-gray-600'}>{debugInfo.searchMethod || 'Popular Products'}</strong></div>
-            </div>
-          </div>
-          
-          {debugInfo.query && (
-            <div>
-              <div className="text-xs font-semibold text-blue-800 mb-1">Query (first 200 chars):</div>
-              <div className="text-xs bg-gray-100 p-2 rounded font-mono text-gray-700 break-all">
-                {debugInfo.query.substring(0, 200)}
-                {debugInfo.query.length > 200 && '...'}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
 export function HomePage() {
   const navigate = useNavigate()
-  const { preferences, updateStreak, resetPreferences } = useUserPreferences()
-  const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized, debugInfo } = useDailyDeals()
-  const { createImageContent, loading: sharing } = useCreateImageContent()
-  
+  const { resetPreferences } = useUserPreferences()
+  const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized, selectedCategoryNames } = useDailyDeals()
   const [isMysteryRevealed, setIsMysteryRevealed] = useState(false)
-
-  useEffect(() => {
-    updateStreak()
-  }, [])
-
-  // Logic for Vault
-  const isVaultUnlocked = preferences.streak >= 3
-
-  // Format currency helper
-  const formatMoney = (amount: string | number, currency = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(typeof amount === 'string' ? parseFloat(amount) : amount)
-  }
-
-  const handleShareDeal = async (product: any) => {
-    try {
-      if (!product.featuredImage?.url) return
-
-      toast.success('Preparing to share...')
-      
-      // Fetch image as blob
-      const response = await fetch(product.featuredImage.url)
-      const blob = await response.blob()
-      const file = new File([blob], "deal.jpg", { type: "image/jpeg" })
-
-      await createImageContent({
-        image: file,
-        contentTitle: `Deciphered Deal: ${product.title}`,
-        visibility: ['DISCOVERABLE', 'LINKABLE']
-      })
-      
-      toast.success('Deal shared to your Shop feed!')
-    } catch (error) {
-      console.error('Share failed:', error)
-      toast.error('Failed to share deal')
-    }
-  }
 
   const handleReset = async () => {
       await resetPreferences()
@@ -215,22 +79,32 @@ export function HomePage() {
 
   return (
     <div className="pb-8 bg-gray-50 min-h-screen relative">
-      <Toaster />
       
       {/* Glassy Header */}
-      <div className="px-4 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-sm transition-all">
-        <div className="flex items-center justify-between">
-            <div className="flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                <TrendingDown className="w-5 h-5 text-red-600" />
-                <h1 className="text-lg font-bold text-gray-900 tracking-tight">Daily Deal Decipher</h1>
+      <div className="px-4 py-4 bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-sm transition-all">
+        <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <h1 className="text-lg font-bold text-gray-900 tracking-tight truncate">Daily Deal Decipher</h1>
                 </div>
-                <p className="text-xs text-gray-500">
-                  {isPersonalized ? 'Curated for you.' : 'Biggest drops, tracked daily.'}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                    {isPersonalized ? 'Curated for you' : 'Top drops'}
+                  </p>
+                  {selectedCategoryNames.length > 0 && (
+                     <>
+                      <span className="text-gray-300 text-xs">•</span>
+                      <div className="flex items-center gap-1 overflow-hidden mask-linear-fade">
+                         <span className="text-xs text-gray-600 font-medium truncate">
+                           {selectedCategoryNames.join(', ')}
+                         </span>
+                      </div>
+                     </>
+                  )}
+                </div>
             </div>
-            <div className="flex gap-2 items-center">
-                <DailyStreak streak={preferences.streak} />
+            <div className="flex gap-2 items-center flex-shrink-0">
                 <button 
                   onClick={handleReset}
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -244,14 +118,16 @@ export function HomePage() {
 
       {/* Hero: Mystery Deal of the Day */}
       <div className="p-4 mb-2">
-        <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="animate-pulse shadow-sm">
-                    <Timer className="w-3 h-3 mr-1" /> Expires Soon
-                </Badge>
-                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Daily Mystery</span>
+        <div className="flex flex-col gap-2 mb-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Badge variant="destructive" className="animate-pulse shadow-sm">
+                        <Timer className="w-3 h-3 mr-1" /> Expires Soon
+                    </Badge>
+                    <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Daily Mystery</span>
+                </div>
+                <CountdownTimer />
             </div>
-            <CountdownTimer />
         </div>
         
         <AnimatePresence mode="wait">
@@ -262,23 +138,21 @@ export function HomePage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.05 }}
-                        onClick={() => isVaultUnlocked && setIsMysteryRevealed(true)}
-                        className={`bg-gray-900 rounded-xl overflow-hidden shadow-xl border-2 border-gray-800 h-[400px] relative group touch-manipulation ${isVaultUnlocked ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        onClick={() => setIsMysteryRevealed(true)}
+                        className={`bg-gray-900 rounded-xl overflow-hidden shadow-xl border-2 border-gray-800 h-[400px] relative group touch-manipulation cursor-pointer`}
                     >
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-white p-6 text-center bg-black/40 group-active:bg-black/50 transition-colors">
                             <motion.div 
-                                animate={{ rotate: isVaultUnlocked ? [0, -10, 10, -5, 5, 0] : 0 }}
+                                animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
                                 transition={{ repeat: Infinity, repeatDelay: 2, duration: 0.5 }}
                             >
-                                <Lock className={`w-16 h-16 mb-4 ${isVaultUnlocked ? 'text-yellow-400' : 'text-gray-500'}`} />
+                                <Lock className={`w-16 h-16 mb-4 text-yellow-400`} />
                             </motion.div>
                             <h3 className="text-2xl font-bold mb-2">
-                                {isVaultUnlocked ? "Decipher Today's Top Drop" : "Locked by Streak"}
+                                Decipher Today's Top Drop
                             </h3>
                             <p className="text-gray-300 mb-6">
-                                {isVaultUnlocked 
-                                    ? "Tap to reveal the biggest savings of the day." 
-                                    : `Visit ${3 - preferences.streak} more days to unlock the Mystery Vault.`}
+                                Tap to reveal the biggest savings of the day.
                             </p>
                             <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full font-mono text-sm border border-white/10">
                                 ???????
@@ -294,26 +168,12 @@ export function HomePage() {
                         key="revealed"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-xl overflow-hidden shadow-lg border border-red-100 ring-2 ring-red-50 relative"
+                        className="relative"
                     >
                          <div className="absolute top-3 right-3 z-10 bg-red-600 text-white px-3 py-1 rounded-full font-bold text-lg shadow-md flex items-center gap-1">
                            <Unlock className="w-3 h-3" /> -{topDeal.discountPercentage}%
                          </div>
                          <ProductCard product={topDeal} />
-                         <div className="px-4 pb-4 -mt-2 space-y-3">
-                            <div className="flex items-center justify-between text-sm text-gray-600 bg-red-50 p-3 rounded-lg border border-red-100">
-                                <span className="flex items-center"><Tag className="w-4 h-4 mr-1"/> You save</span>
-                                <span className="font-bold text-red-700 text-lg">{formatMoney(topDeal.savingsAmount)}</span>
-                            </div>
-                            <Button 
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => handleShareDeal(topDeal)}
-                                disabled={sharing}
-                            >
-                                <Share2 className="w-4 h-4 mr-2" />
-                                {sharing ? 'Sharing...' : 'Share Discovery'}
-                            </Button>
-                        </div>
                     </motion.div>
                 )
             ) : (
@@ -323,9 +183,6 @@ export function HomePage() {
             )}
         </AnimatePresence>
       </div>
-
-      {/* Debug Card */}
-      <DebugCard debugInfo={debugInfo} />
 
       {/* List: Top Drops */}
       <div className="px-4">

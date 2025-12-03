@@ -72,6 +72,24 @@ export function useDailyDeals() {
     return combinedQuery
   }, [preferences.categories])
 
+  const selectedCategoryNames = useMemo(() => {
+    const names: string[] = []
+    preferences.categories.forEach(categoryId => {
+      let foundCategory: any = null
+      ;(categoriesData as any).verticals.forEach((vertical: any) => {
+        const category = vertical.categories?.find((cat: any) => cat.id === categoryId)
+        if (category) {
+          foundCategory = category
+        }
+      })
+      
+      if (foundCategory) {
+        names.push(foundCategory.name)
+      }
+    })
+    return names
+  }, [preferences.categories])
+
   const search = useProductSearch({ 
     query: searchQuery,
     skip: !searchQuery
@@ -120,6 +138,7 @@ export function useDailyDeals() {
     isLoading: loading,
     hasMore: hasNextPage,
     isPersonalized: hasPreferences,
+    selectedCategoryNames,
     // Debug info
     debugInfo: {
       searchTerms: searchQuery ? searchQuery.split(' OR ').slice(0, 20) : [],
