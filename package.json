@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "@shopify/shop-minis-cli": "0.0.212",
+    "@shopify/shop-minis-cli": "0.0.219",
     "@tailwindcss/vite": "^4.1.8",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
@@ -28,9 +28,13 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@shopify/shop-minis-react": "0.4.2",
+    "@shopify/shop-minis-react": "0.4.10",
     "lucide-react": "0.513.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
-  }
+  },
+  "browserslist": [
+    "ios >= 15",
+    "android >= 138"
+  ]
 }

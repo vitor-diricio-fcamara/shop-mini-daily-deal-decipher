@@ -35,7 +35,6 @@ export function useDailyDeals() {
   // Build query from selected level 2 categories using breadcrumb paths
   const searchQuery = useMemo(() => {
     if (preferences.categories.length === 0) {
-      console.log('[useDailyDeals] No categories selected, using popular products')
       return ''
     }
     
@@ -56,19 +55,16 @@ export function useDailyDeals() {
         const robustQuery = getRobustQuery(foundCategory)
         if (robustQuery) {
           queries.push(robustQuery)
-          console.log(`[useDailyDeals] Category "${foundCategory.name}" -> Query: "${robustQuery}"`)
         }
       }
     })
     
     if (queries.length === 0) {
-      console.warn('[useDailyDeals] No valid categories found, using popular products')
       return ''
     }
     
     // Combine all queries with OR
     const combinedQuery = queries.join(' OR ')
-    console.log(`[useDailyDeals] Combined query: ${combinedQuery.substring(0, 200)}...`)
     return combinedQuery
   }, [preferences.categories])
 
