@@ -14,18 +14,20 @@
     "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "@shopify/shop-minis-cli": "0.0.219",
+    "@shopify/shop-minis-cli": "0.0.224",
     "@tailwindcss/vite": "^4.1.8",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^30.0.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^5.1.1",
     "jsdom": "^25.0.1",
+    "stylelint-config-standard": "^39.0.1",
     "tailwindcss": "^4.1.8",
     "typescript": "^5.8.3",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "dependencies": {
     "@shopify/shop-minis-react": "0.4.10",

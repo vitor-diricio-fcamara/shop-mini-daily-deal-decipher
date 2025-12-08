@@ -1,5 +1,7 @@
 {
   "name": "daily-deal-decipher",
+  "handle": "daily-deal-decipher",
+  "description": "Unlock exclusive daily deals tailored to your personal interests. Decipher the savings before they expire!",
   "permissions": [],
   "scopes": [
     "product_list:write"

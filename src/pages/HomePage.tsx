@@ -1,5 +1,5 @@
 import { ProductCard, List, Badge, Button, Skeleton } from '@shopify/shop-minis-react'
-import { Timer, TrendingDown, Percent, Lock, Unlock, Clock, Settings } from 'lucide-react'
+import { Timer, TrendingDown, Percent, Lock, Unlock, Clock, SlidersHorizontal } from 'lucide-react'
 import { useDailyDeals } from '../hooks/useDailyDeals'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -68,9 +68,8 @@ export function HomePage() {
   const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized, selectedCategoryNames } = useDailyDeals()
   const [isMysteryRevealed, setIsMysteryRevealed] = useState(false)
 
-  const handleReset = async () => {
-      await resetPreferences()
-      navigate('/onboarding') // Force reload/redirect
+  const handleEditPreferences = () => {
+      navigate('/onboarding')
   }
 
   if (isLoading && !topDeal) {
@@ -106,11 +105,11 @@ export function HomePage() {
             </div>
             <div className="flex gap-2 items-center flex-shrink-0">
                 <button 
-                  onClick={handleReset}
+                  onClick={handleEditPreferences}
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  aria-label="Reset Preferences"
+                  aria-label="Edit Preferences"
                 >
-                  <Settings className="w-5 h-5 text-gray-500" />
+                  <SlidersHorizontal className="w-5 h-5 text-gray-500" />
                 </button>
             </div>
         </div>
