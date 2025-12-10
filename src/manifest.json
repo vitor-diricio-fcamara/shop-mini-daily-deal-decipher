@@ -1,7 +1,11 @@
 {
   "name": "daily-deal-decipher",
+  "handle": "daily-deal-decipher",
+  "description": "Unlock exclusive daily deals tailored to your personal interests. Decipher the savings before they expire!",
   "permissions": [],
   "scopes": [
     "product_list:write"
-  ]
+  ],
+  "privacy_policy_url": "https://fcamaraLeo.github.io/daily-deal-legal/privacy_policy.html",
+  "terms_url": "https://fcamaraLeo.github.io/daily-deal-legal/terms_conditions.html"
 }
