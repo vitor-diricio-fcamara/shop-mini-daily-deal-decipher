@@ -3,7 +3,6 @@ import { Timer, TrendingDown, Percent, Lock, Unlock, Clock, SlidersHorizontal } 
 import { useDailyDeals } from '../hooks/useDailyDeals'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUserPreferences } from '../hooks/useUserPreferences'
 import { useNavigate } from 'react-router'
 
 // --- Components ---
@@ -64,7 +63,6 @@ function LoadingSkeleton() {
 
 export function HomePage() {
   const navigate = useNavigate()
-  const { resetPreferences } = useUserPreferences()
   const { topDeal, otherDeals, fetchMore, isLoading, isPersonalized, selectedCategoryNames } = useDailyDeals()
   const [isMysteryRevealed, setIsMysteryRevealed] = useState(false)
 
@@ -119,13 +117,13 @@ export function HomePage() {
       <div className="p-4 mb-2">
         <div className="flex flex-col gap-2 mb-3">
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Badge variant="destructive" className="animate-pulse shadow-sm">
-                        <Timer className="w-3 h-3 mr-1" /> Expires Soon
-                    </Badge>
-                    <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Daily Mystery</span>
-                </div>
-                <CountdownTimer />
+            <div className="flex items-center gap-2">
+                <Badge variant="destructive" className="animate-pulse shadow-sm">
+                    <Timer className="w-3 h-3 mr-1" /> Expires Soon
+                </Badge>
+                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">Daily Mystery</span>
+            </div>
+            <CountdownTimer />
             </div>
         </div>
         
