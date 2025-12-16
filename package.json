@@ -30,7 +30,7 @@
     "vitest": "^2.1.9"
   },
   "dependencies": {
-    "@shopify/shop-minis-react": "0.4.10",
+    "@shopify/shop-minis-react": "0.4.16",
     "lucide-react": "0.513.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
